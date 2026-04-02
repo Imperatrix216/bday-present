@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Page For Someone's Special Day</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="title.png" type="image/png">
+  
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { 
+    getFirestore, 
+    collection, 
+    addDoc, 
+    query, 
+    orderBy, 
+    onSnapshot 
+  } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAC9OeTkcT9ZfH3krSk3zT_3-EcUcQBiDk",
+    authDomain: "bday-2008.firebaseapp.com",
+    projectId: "bday-2008",
+    storageBucket: "bday-2008.firebasestorage.app",
+    messagingSenderId: "91503868873",
+    appId: "1:91503868873:web:38c1342a7d460ec65fc618"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  window.addEventListener("DOMContentLoaded", () => {
+
+    const form = document.querySelector("form");
+    const container = document.querySelector(".message-container");
+
+    const q = query(
+      collection(db, "messages"), 
+      orderBy("createdAt", "desc")
+    );
+
+    onSnapshot(q, (snapshot) => {
+      container.innerHTML = "";
+
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+
+        const card = document.createElement("div");
+        card.className = "message-card";
+
+        card.innerHTML = `
+          <h3>${data.name}</h3>
+          <p>${data.message}</p>
+        `;
+
+        container.appendChild(card);
+      });
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = form.querySelector("input").value.trim();
+      const message = form.querySelector("textarea").value.trim();
+
+      if (!name || !message) return;
+
+      await addDoc(collection(db, "messages"), {
+        name,
+        message,
+        createdAt: Date.now()
+      });
+
+      form.reset();
+    });
+
+  });
+</script>
+</head>
+<body>
+
+  <header class="hero">
+    <h1>Happy Birthday Filipa</h1>
+    <p>Leave your wishes and make this day special</p>
+  </header>
+
+  <main>
+
+    <!-- Messages Section -->
+    <section class="messages">
+      <h2>💌 Messages</h2>
+      <div class="message-container">
+        <!-- Example message -->
+        <div class="message-card">
+        </div>
+      </div>
+    </section>
+
+    <!-- Form Section -->
+    <section class="form-section">
+      <h2>✨ Leave a Message</h2>
+      <form>
+        <input type="text" placeholder="Your name" required>
+        <textarea placeholder="Write something nice..." required></textarea>
+        <button type="submit">Send 💜</button>
+      </form>
+    </section>
+
+  </main>
+
+</body>
+</html>
